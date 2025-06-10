@@ -2,7 +2,7 @@ import axios from "axios";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:3000",
-  timeout: 10000,
+  timeout: 20000,
 });
 
 axiosInstance.interceptors.request.use(
@@ -16,6 +16,8 @@ axiosInstance.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
+//[todo] refresh token
 
 axiosInstance.interceptors.response.use(
   (response) => response,
