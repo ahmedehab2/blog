@@ -1,5 +1,5 @@
 import { AxiosError } from "axios";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 import useSWR from "swr";
 
@@ -77,7 +77,12 @@ export default function PostForm() {
     } catch (error) {
       setIsLoading(false);
       if (error instanceof AxiosError) {
-        setError(error.response?.data.message);
+        if (error.status === 422) {
+          //valdiation err
+          setError([...error.response.data.message]);
+        } else {
+          setError((prevError) => [...prevError, error.response.data.message]);
+        }
       } else {
         setError("An error occurred. Please try again later.");
       }
@@ -100,7 +105,18 @@ export default function PostForm() {
       <h2 className="text-2xl font-bold mb-4">
         {isEditMode ? "Edit Post" : "Add New Post"}
       </h2>
-      {error || (postError && <p className="mb-4 text-red-500">{error}</p>)}
+      <ul className="mb-3">
+        {error.length > 0
+          ? error.map((e) => (
+              <li className="text-red-500" key={e}>
+                {e}
+              </li>
+            ))
+          : null}
+        {postError ? (
+          <li className="text-red-500">Failed to load post data.</li>
+        ) : null}
+      </ul>
       <div className="mb-4">
         <label className="block text-sm font-medium mb-2">Title</label>
         <input
@@ -126,6 +142,7 @@ export default function PostForm() {
       </div>
       <div className="mb-4">
         <label className="block text-sm font-medium mb-2">Image</label>
+
         {form.imageUrl && (
           <div className="mb-2">
             <img
@@ -146,6 +163,9 @@ export default function PostForm() {
           required={!isEditMode && !form.imageUrl}
           className="file-input file-input-neutral"
         />
+        <span className="text-sm text-gray-500 ml-2">
+          File size should be less than 1Mb.
+        </span>
       </div>
 
       <button type="submit" className="btn">
