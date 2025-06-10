@@ -11,7 +11,7 @@ export default function Auth({ mode }) {
     email: "",
     password: "",
   });
-  const [error, setError] = useState("");
+  const [error, setError] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -43,15 +43,18 @@ export default function Auth({ mode }) {
         ? await login(formData.email, formData.password)
         : await register(formData.name, formData.email, formData.password);
 
-      console.log(response);
-
       localStorage.setItem("token", response.data.token);
       setUser(response.data.user);
       navigate("/");
     } catch (error) {
       setIsLoading(false);
       if (error instanceof AxiosError) {
-        setError(error.response?.data.message);
+        if (error.status === 422) {
+          //valdiation err
+          setError([...error.response.data.errors]);
+        } else {
+          setError((prevError) => [...prevError, error.response.data.message]);
+        }
       } else {
         setError("An error occurred. Please try again later.");
       }
@@ -65,7 +68,16 @@ export default function Auth({ mode }) {
         className="w-full sm:w-1/2 xl:w-3/12 p-6 shadow-xl rounded"
       >
         <h2 className="text-2xl font-bold mb-4">{title}</h2>
-        {error && <p className="mb-4">{error}</p>}
+
+        <ul className="mb-3">
+          {error.length > 0
+            ? error.map((e) => (
+                <li className="text-red-500" key={e}>
+                  {e}
+                </li>
+              ))
+            : null}
+        </ul>
 
         {!isLogin && (
           <div className="mb-4">
