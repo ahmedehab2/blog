@@ -63,7 +63,7 @@ export default function Home() {
                 <div className="card-title justify-between">
                   <h2>{post.title}</h2>
                   <span className="text-sm text-gray-500">
-                    {new Date(post.updatedAt).toLocaleDateString()}
+                    {new Date(post.createdAt).toLocaleString("en-GB")}
                   </span>
                 </div>
 
